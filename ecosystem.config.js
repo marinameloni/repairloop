@@ -10,7 +10,7 @@ module.exports = {
       env: {
         NODE_ENV: 'production',
         PORT: 3001,
-        CORS_ORIGIN: 'https://yourdomain.com',
+        CORS_ORIGIN: 'http://193.168.146.9:3000',
         JWT_SECRET: 'CHANGE_THIS_IN_PRODUCTION_WITH_STRONG_SECRET',
         DB_PATH: '/var/www/repair-loop/backend/game.db'
       },
