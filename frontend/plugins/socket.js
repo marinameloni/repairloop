@@ -1,6 +1,11 @@
 import { io } from 'socket.io-client'
 
 export default defineNuxtPlugin(() => {
+  // Only initialize on client side
+  if (process.server) {
+    return
+  }
+
   // Construct backend URL from current location
   const protocol = window.location.protocol === 'https:' ? 'https' : 'http'
   const host = window.location.hostname
