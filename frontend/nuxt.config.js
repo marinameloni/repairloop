@@ -3,7 +3,13 @@ export default defineNuxtConfig({
   css: ['~/assets/app.css'],
   runtimeConfig: {
     public: {
-      apiBase: process.env.API_BASE || 'http://localhost:3001'
+      apiBase: process.env.API_BASE || ''
+    }
+  },
+  ssr: true,
+  nitro: {
+    prerender: {
+      crawlLinks: false
     }
   }
 })

@@ -145,7 +145,7 @@ const createAccount = async () => {
 
   try {
     // Create player
-    const response = await fetch('http://localhost:3001/api/players', {
+    const response = await fetch('/api/players', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
