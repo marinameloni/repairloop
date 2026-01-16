@@ -68,7 +68,7 @@ log_success "Backend dependencies installed"
 # Step 4: Install frontend dependencies
 log_info "Installing frontend dependencies..."
 cd $APP_DIR/frontend || handle_error "Cannot cd to frontend"
-npm ci --omit=dev || handle_error "Frontend npm install"
+npm install --omit=dev || handle_error "Frontend npm install"
 log_success "Frontend dependencies installed"
 
 # Step 5: Build frontend (Nuxt)
