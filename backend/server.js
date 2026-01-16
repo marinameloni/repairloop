@@ -13,7 +13,11 @@ const io = socketIo(server, {
   cors: { origin: process.env.CORS_ORIGIN || 'http://localhost:3000' }
 })
 
-const db = new sqlite3.Database('./game.db')
+const dbPath = process.env.DB_PATH || require('path').join(__dirname, 'game.db')
+const db = new sqlite3.Database(dbPath, (err) => {
+  if (err) console.error('❌ Database connection error:', err.message)
+  else console.log('✅ Database connected:', dbPath)
+})
 
 // Export db BEFORE requiring routes
 module.exports = { db, io }
