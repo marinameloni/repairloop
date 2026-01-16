@@ -106,6 +106,8 @@ cd $APP_DIR || handle_error "Cannot cd to $APP_DIR"
 
 # Step 10: Start/restart services
 log_info "Starting services with PM2..."
+pm2 delete ecosystem.config.js 2>/dev/null || true
+sleep 1
 pm2 start ecosystem.config.js --update-env || handle_error "PM2 start"
 sleep 3
 log_success "Services started"

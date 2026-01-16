@@ -33,7 +33,9 @@ module.exports = {
       exec_mode: 'fork',
       env: {
         NODE_ENV: 'production',
-        PORT: 3000
+        PORT: 3000,
+        HOST: '0.0.0.0',
+        NITRO_HOST: '0.0.0.0'
       },
       error_file: '/var/log/repair-loop/frontend-error.log',
       out_file: '/var/log/repair-loop/frontend-out.log',

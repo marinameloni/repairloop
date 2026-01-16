@@ -119,8 +119,9 @@ io.on('connection', (socket) => {
 })
 
 const PORT = process.env.PORT || 3001
-server.listen(PORT, () => {
-  console.log(`✅ Server is running on port ${PORT}`)
+const HOST = '0.0.0.0'
+server.listen(PORT, HOST, () => {
+  console.log(`✅ Server is running on http://${HOST}:${PORT}`)
   console.log(`📍 Environment: ${process.env.NODE_ENV}`)
   console.log(`🔒 CORS enabled for: ${process.env.CORS_ORIGIN}`)
 })
