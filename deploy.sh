@@ -56,7 +56,8 @@ log_success "All prerequisites met"
 # Step 2: Pull code from GitHub
 log_info "Pulling latest code from GitHub..."
 cd $APP_DIR || handle_error "Cannot cd to $APP_DIR"
-git pull origin $BRANCH || handle_error "Git pull"
+git fetch origin $BRANCH || handle_error "Git fetch"
+git reset --hard origin/$BRANCH || handle_error "Git reset"
 log_success "Code updated"
 
 # Step 3: Install backend dependencies
