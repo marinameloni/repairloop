@@ -11,7 +11,7 @@ export default defineNuxtPlugin(() => {
   
   const socket = io(socketUrl, {
     path: '/socket.io',
-    transports: ['websocket', 'polling'],
+    transports: ['polling'],
     reconnection: true,
     reconnectionDelay: 1000,
     reconnectionDelayMax: 5000,
