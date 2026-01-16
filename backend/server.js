@@ -86,6 +86,11 @@ const tilesRouter = require('./routes/tiles')
 const actionsRouter = require('./routes/actions')
 const chatRouter = require('./routes/chat')
 
+// Test endpoint
+app.get('/api/test', (req, res) => {
+  res.json({ status: 'ok', message: 'Backend is working' })
+})
+
 app.use('/api/players', authLimiter, playersRouter)
 app.use('/api/tiles', tilesRouter)
 app.use('/api/actions', actionsRouter)
