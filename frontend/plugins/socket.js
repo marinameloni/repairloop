@@ -6,16 +6,16 @@ export default defineNuxtPlugin(() => {
     return
   }
 
-  // Construct backend URL from current location
-  const protocol = window.location.protocol === 'https:' ? 'https' : 'http'
-  const host = window.location.hostname
-  const backendUrl = `${protocol}://${host}:3001`
+  // Use the current origin (will go through Nginx)
+  const socketUrl = typeof window !== 'undefined' ? window.location.origin : ''
   
-  const socket = io(backendUrl, {
+  const socket = io(socketUrl, {
+    path: '/socket.io',
+    transports: ['websocket', 'polling'],
     reconnection: true,
     reconnectionDelay: 1000,
     reconnectionDelayMax: 5000,
-    reconnectionAttempts: 5
+    reconnectionAttempts: 5,
   })
 
   socket.on('connect', () => {
@@ -26,9 +26,13 @@ export default defineNuxtPlugin(() => {
     console.log('Disconnected from server')
   })
 
+  socket.on('error', (error) => {
+    console.error('Socket error:', error)
+  })
+
   return {
     provide: {
-      socket
-    }
+      socket,
+    },
   }
 })
