@@ -74,8 +74,8 @@ app.use(cors({
 }))
 
 // Middleware
-app.use(express.json({ limit: '10kb' })) // Limit payload size to 10kb
-app.use(express.urlencoded({ limit: '10kb', extended: true }))
+app.use(express.json({ limit: '50kb' })) // Limit payload size to 50kb
+app.use(express.urlencoded({ limit: '50kb', extended: true }))
 
 // ============================================================================
 // ROUTES
