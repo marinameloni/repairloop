@@ -1,0 +1,35 @@
+name: Deploy to Production VPS
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Allows manual trigger
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: 🔔 Start deployment notification
+        run: echo "Starting deployment to production..."
+
+      - name: 🔐 Deploy via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || '22' }}
+          script: |
+            cd /var/www/repair-loop
+            chmod +x deploy.sh
+            ./deploy.sh
+
+      - name: ✅ Deployment complete
+        run: echo "Production deployment completed successfully"
+
+      - name: 📧 Notify on failure
+        if: failure()
+        run: echo "Deployment failed - check logs in GitHub Actions"
