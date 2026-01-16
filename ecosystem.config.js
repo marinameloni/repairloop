@@ -27,15 +27,13 @@ module.exports = {
     // Frontend Nuxt
     {
       name: 'repair-loop-frontend',
-      script: 'npm',
-      args: 'run start',
-      cwd: '/var/www/repair-loop/frontend',
+      script: './frontend/.output/server/index.mjs',
+      cwd: '/var/www/repair-loop',
       instances: 1,
       exec_mode: 'fork',
       env: {
         NODE_ENV: 'production',
-        PORT: 3000,
-        API_BASE: 'https://yourdomain.com/api'
+        PORT: 3000
       },
       error_file: '/var/log/repair-loop/frontend-error.log',
       out_file: '/var/log/repair-loop/frontend-out.log',
