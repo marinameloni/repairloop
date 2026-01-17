@@ -48,4 +48,35 @@ router.delete('/:id', (req, res) => {
   })
 })
 
+// POST save tiles (bulk update for blocked tiles)
+router.post('/save', (req, res) => {
+  const { mapId, tiles } = req.body
+  
+  if (!Array.isArray(tiles)) {
+    return res.status(400).json({ error: 'tiles must be an array' })
+  }
+
+  // Update each blocked tile
+  let completed = 0
+  let hasError = false
+
+  if (tiles.length === 0) {
+    return res.json({ message: 'No tiles to save' })
+  }
+
+  tiles.forEach(tile => {
+    WorldTile.update(tile.x, tile.y, mapId, { is_blocked: true }, (err) => {
+      completed++
+      if (err && !hasError) {
+        hasError = true
+        return res.status(500).json({ error: err.message })
+      }
+      
+      if (completed === tiles.length && !hasError) {
+        res.json({ message: `Updated ${tiles.length} tiles` })
+      }
+    })
+  })
+})
+
 module.exports = router
