@@ -5,6 +5,8 @@ const socketIo = require('socket.io')
 const sqlite3 = require('sqlite3').verbose()
 const helmet = require('helmet')
 const rateLimit = require('express-rate-limit')
+const fs = require('fs')
+const path = require('path')
 require('dotenv').config()
 
 const app = express()
@@ -13,11 +15,29 @@ const io = socketIo(server, {
   cors: { origin: process.env.CORS_ORIGIN || 'http://localhost:3000' }
 })
 
-const dbPath = process.env.DB_PATH || require('path').join(__dirname, 'game.db')
+const dbPath = process.env.DB_PATH || path.join(__dirname, 'game.db')
 const db = new sqlite3.Database(dbPath, (err) => {
   if (err) console.error('❌ Database connection error:', err.message)
-  else console.log('✅ Database connected:', dbPath)
+  else {
+    console.log('✅ Database connected:', dbPath)
+    // Initialize schema on startup
+    initializeDatabase()
+  }
 })
+
+// Initialize database schema
+function initializeDatabase() {
+  const schemaPath = path.join(__dirname, 'db', 'create_tables.sql')
+  const schema = fs.readFileSync(schemaPath, 'utf8')
+  
+  db.exec(schema, (err) => {
+    if (err) {
+      console.error('❌ Failed to initialize database schema:', err.message)
+    } else {
+      console.log('✅ Database schema initialized')
+    }
+  })
+}
 
 // Export db BEFORE requiring routes
 module.exports = { db, io }
@@ -74,8 +94,8 @@ app.use(cors({
 }))
 
 // Middleware
-app.use(express.json({ limit: '50kb' })) // Limit payload size to 50kb
-app.use(express.urlencoded({ limit: '50kb', extended: true }))
+app.use(express.json({ limit: '10kb' })) // Limit payload size to 10kb
+app.use(express.urlencoded({ limit: '10kb', extended: true }))
 
 // ============================================================================
 // ROUTES
@@ -85,11 +105,6 @@ const playersRouter = require('./routes/players')
 const tilesRouter = require('./routes/tiles')
 const actionsRouter = require('./routes/actions')
 const chatRouter = require('./routes/chat')
-
-// Test endpoint
-app.get('/api/test', (req, res) => {
-  res.json({ status: 'ok', message: 'Backend is working' })
-})
 
 app.use('/api/players', authLimiter, playersRouter)
 app.use('/api/tiles', tilesRouter)

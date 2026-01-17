@@ -145,7 +145,8 @@ const createAccount = async () => {
 
   try {
     // Create player
-    const response = await fetch('/api/players', {
+    const apiBase = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3001'
+    const response = await fetch(`${apiBase}/api/players`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -165,19 +166,22 @@ const createAccount = async () => {
     })
 
     if (!response.ok) {
-      throw new Error('Failed to create account')
+      const errorData = await response.json()
+      throw new Error(errorData.error || 'Failed to create account')
     }
 
     const player = await response.json()
 
     // Store player in sessionStorage or state management
-    sessionStorage.setItem('playerId', player.id)
-    sessionStorage.setItem('playerName', player.username)
-    sessionStorage.setItem('avatarType', player.avatar_type)
+    sessionStorage.setItem('playerId', player.player.id)
+    sessionStorage.setItem('playerName', player.player.username)
+    sessionStorage.setItem('avatarType', player.player.avatar_type)
+    sessionStorage.setItem('token', player.token)
 
     // Navigate to game
     router.push('/game')
   } catch (err) {
+    console.error('Account creation error:', err)
     error.value = err.message || 'Failed to create account. Please try again.'
   } finally {
     loading.value = false
