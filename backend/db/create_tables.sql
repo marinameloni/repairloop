@@ -35,12 +35,17 @@ CREATE TABLE IF NOT EXISTS world_tiles (
   type TEXT NOT NULL DEFAULT 'empty',
   state TEXT NOT NULL DEFAULT 'normal',
   is_walkable BOOLEAN DEFAULT 1,
+  is_blocked BOOLEAN DEFAULT 0,
+  block_type TEXT,
+  clicks_remaining INTEGER DEFAULT 0,
+  progress INTEGER DEFAULT 0,
   last_action_by INTEGER,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   UNIQUE(x, y),
   CHECK (type IN ('factory', 'empty', 'village', 'field', 'water', 'forest')),
   CHECK (state IN ('polluted', 'repaired', 'embellished', 'watered', 'planted', 'normal')),
+  CHECK (block_type IS NULL OR block_type IN ('factory', 'debris', 'wall', 'decor')),
   FOREIGN KEY (world_state_id) REFERENCES world_state(id),
   FOREIGN KEY (last_action_by) REFERENCES players(id) ON DELETE SET NULL
 );
@@ -58,6 +63,31 @@ CREATE TABLE IF NOT EXISTS action_logs (
   CHECK (direction IS NULL OR direction IN ('up', 'down', 'left', 'right')),
   FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE,
   FOREIGN KEY (tile_id) REFERENCES world_tiles(id) ON DELETE CASCADE
+);
+
+-- Actions table (defines possible actions)
+CREATE TABLE IF NOT EXISTS actions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT UNIQUE NOT NULL,
+  target_state TEXT,
+  required_clicks INTEGER DEFAULT 1,
+  progress_per_click INTEGER DEFAULT 1,
+  is_cooperative BOOLEAN DEFAULT 1,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CHECK (name IN ('destroy_factory', 'clean_rubble', 'water_field', 'plant_tree', 'build_house'))
+);
+
+-- Player actions (records each click)
+CREATE TABLE IF NOT EXISTS player_actions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  player_id INTEGER NOT NULL,
+  tile_id INTEGER NOT NULL,
+  action_id INTEGER NOT NULL,
+  click_count INTEGER DEFAULT 1,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE,
+  FOREIGN KEY (tile_id) REFERENCES world_tiles(id) ON DELETE CASCADE,
+  FOREIGN KEY (action_id) REFERENCES actions(id) ON DELETE CASCADE
 );
 
 -- Events table
@@ -85,9 +115,14 @@ CREATE TABLE IF NOT EXISTS chat_messages (
 -- Create indexes for frequently queried columns
 CREATE INDEX IF NOT EXISTS idx_players_username ON players(username);
 CREATE INDEX IF NOT EXISTS idx_world_tiles_coords ON world_tiles(x, y);
+CREATE INDEX IF NOT EXISTS idx_world_tiles_blocked ON world_tiles(is_blocked);
 CREATE INDEX IF NOT EXISTS idx_action_logs_player_id ON action_logs(player_id);
 CREATE INDEX IF NOT EXISTS idx_action_logs_tile_id ON action_logs(tile_id);
 CREATE INDEX IF NOT EXISTS idx_action_logs_timestamp ON action_logs(timestamp);
+CREATE INDEX IF NOT EXISTS idx_player_actions_player_id ON player_actions(player_id);
+CREATE INDEX IF NOT EXISTS idx_player_actions_tile_id ON player_actions(tile_id);
+CREATE INDEX IF NOT EXISTS idx_player_actions_action_id ON player_actions(action_id);
+CREATE INDEX IF NOT EXISTS idx_player_actions_timestamp ON player_actions(created_at);
 CREATE INDEX IF NOT EXISTS idx_chat_messages_player_id ON chat_messages(player_id);
 CREATE INDEX IF NOT EXISTS idx_chat_messages_timestamp ON chat_messages(timestamp);
 CREATE INDEX IF NOT EXISTS idx_chat_messages_channel ON chat_messages(channel);
