@@ -144,6 +144,7 @@ const login = async () => {
   try {
     // Always use relative path in production, absolute in development
     const apiPath = '/api/players/login'
+    console.log('🔐 Logging in to:', apiPath)
     const response = await fetch(apiPath, {
       method: 'POST',
       headers: {
@@ -155,12 +156,23 @@ const login = async () => {
       })
     })
 
+    console.log('📡 Response status:', response.status)
+    console.log('📡 Response headers:', response.headers)
+    
+    const responseText = await response.text()
+    console.log('📡 Response body (raw):', responseText)
+    
     if (!response.ok) {
-      const errorData = await response.json()
-      throw new Error(errorData.error || 'Invalid username or password')
+      try {
+        const errorData = JSON.parse(responseText)
+        throw new Error(errorData.error || 'Invalid username or password')
+      } catch (e) {
+        throw new Error('Invalid username or password')
+      }
     }
 
-    const player = await response.json()
+    const player = JSON.parse(responseText)
+    console.log('✅ Login successful:', player)
 
     sessionStorage.setItem('playerId', player.player.id)
     sessionStorage.setItem('playerName', player.player.username)
@@ -170,7 +182,7 @@ const login = async () => {
 
     router.push('/game')
   } catch (err) {
-    console.error('Login error:', err)
+    console.error('❌ Login error:', err)
     error.value = err.message || 'Failed to login. Please try again.'
   } finally {
     loading.value = false
