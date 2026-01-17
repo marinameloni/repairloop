@@ -13,13 +13,16 @@ export default defineNuxtConfig({
     },
     proxy: {
       '/api': {
-        target: 'http://localhost:3001',
+        target: process.env.BACKEND_URL || 'http://localhost:3001',
         changeOrigin: true
       },
       '/socket.io': {
-        target: 'http://localhost:3001',
+        target: process.env.BACKEND_URL || 'http://localhost:3001',
         ws: true
       }
     }
+  },
+  build: {
+    transpile: ['socket.io-client']
   }
 })

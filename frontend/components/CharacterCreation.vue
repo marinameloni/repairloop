@@ -142,8 +142,9 @@ const login = async () => {
   error.value = ''
 
   try {
-    const apiBase = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3001'
-    const response = await fetch(`${apiBase}/api/players/login`, {
+    // Always use relative path in production, absolute in development
+    const apiPath = '/api/players/login'
+    const response = await fetch(apiPath, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -206,8 +207,9 @@ const createAccount = async () => {
   error.value = ''
 
   try {
-    const apiBase = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3001'
-    const response = await fetch(`${apiBase}/api/players`, {
+    // Always use relative path in production, absolute in development
+    const apiPath = '/api/players'
+    const response = await fetch(apiPath, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
