@@ -177,8 +177,8 @@ io.on('connection', (socket) => {
   socket.on('chat:message', (data) => {
     console.log(`Chat from ${data.username}: ${data.message}`)
     
-    // Broadcast message to all other clients
-    socket.broadcast.emit('chat:message', {
+    // Broadcast message to ALL clients (frontend filters by playerId)
+    io.emit('chat:message', {
       playerId: data.playerId,
       username: data.username,
       message: data.message,
