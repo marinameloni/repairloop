@@ -136,14 +136,78 @@ app.use((err, req, res, next) => {
 })
 
 // ============================================================================
-// SOCKET.IO SECURITY
+// SOCKET.IO EVENTS
 // ============================================================================
+
+// Store connected players
+const connectedPlayers = {}
 
 io.on('connection', (socket) => {
   console.log('New client connected:', socket.id)
 
+  // Player joins the game
+  socket.on('player:join', (data) => {
+    console.log(`Player joined: ${data.username} (${data.playerId})`)
+    connectedPlayers[data.playerId] = {
+      ...data,
+      socketId: socket.id
+    }
+    
+    // Broadcast to all clients that a new player joined
+    io.emit('player:update', {
+      playerId: data.playerId,
+      username: data.username,
+      x: data.x,
+      y: data.y,
+      mapId: data.mapId
+    })
+  })
+
+  // Player moves
+  socket.on('player:move', (data) => {
+    if (connectedPlayers[data.playerId]) {
+      connectedPlayers[data.playerId] = { ...connectedPlayers[data.playerId], ...data }
+    }
+    
+    // Broadcast movement to all other clients
+    socket.broadcast.emit('player:move', data)
+  })
+
+  // Player sends chat message
+  socket.on('chat:message', (data) => {
+    console.log(`Chat from ${data.username}: ${data.message}`)
+    
+    // Broadcast message to all other clients
+    socket.broadcast.emit('chat:message', {
+      playerId: data.playerId,
+      username: data.username,
+      message: data.message,
+      x: data.x,
+      y: data.y,
+      mapId: data.mapId
+    })
+  })
+
+  // Player leaves
+  socket.on('player:left', (playerId) => {
+    console.log(`Player left: ${playerId}`)
+    delete connectedPlayers[playerId]
+    
+    // Broadcast player left to all clients
+    io.emit('player:left', playerId)
+  })
+
   socket.on('disconnect', () => {
     console.log('Client disconnected:', socket.id)
+    
+    // Find and remove disconnected player
+    for (const playerId in connectedPlayers) {
+      if (connectedPlayers[playerId].socketId === socket.id) {
+        delete connectedPlayers[playerId]
+        io.emit('player:left', playerId)
+        break
+      }
+    }
   })
 })
 
