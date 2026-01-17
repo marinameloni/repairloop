@@ -39,25 +39,12 @@ function initializeDatabase() {
         console.error('❌ Failed to initialize database schema:', err.message)
       } else {
         console.log('✅ Database schema initialized')
-        // Load blocked tiles for map1
-        loadBlockedTiles()
       }
     })
   })
 }
 
-// Load blocked tiles for map1
-function loadBlockedTiles() {
-  const tilesPath = path.join(__dirname, 'db', 'add_blocked_tiles_map1.sql')
-  const tilesSql = fs.readFileSync(tilesPath, 'utf8')
-  
-  db.exec(tilesSql, (err) => {
-    if (err) {
-      console.error('⚠️  Could not load blocked tiles:', err.message)
-    } else {
-      console.log('✅ Blocked tiles loaded for map1')
-    }
-  })
+// Blocked tiles are already in the database, no need to load from file
 }
 
 // Export db BEFORE requiring routes
