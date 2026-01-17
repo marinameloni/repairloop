@@ -44,9 +44,6 @@ function initializeDatabase() {
   })
 }
 
-// Blocked tiles are already in the database, no need to load from file
-}
-
 // Export db BEFORE requiring routes
 module.exports = { db, io }
 
