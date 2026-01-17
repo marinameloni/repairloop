@@ -28,17 +28,15 @@ router.post('/', validatePlayerCreation, handleValidationErrors, (req, res) => {
   
   Player.create(req.body, (err, player) => {
     if (err) {
-      console.error('Player creation error:', err.message)
       if (err.message.includes('UNIQUE constraint failed')) {
         return res.status(409).json({ error: 'Username already taken' })
       }
-      return res.status(500).json({ error: 'Failed to create account', details: err.message })
+      return res.status(500).json({ error: 'Failed to create account' })
     }
     
     // Generate token
     const token = generateToken(player.id, player.username)
     
-    console.log('✅ Player created:', username)
     res.status(201).json({
       player: {
         id: player.id,

@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS world_tiles (
   last_action_by INTEGER,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE(x, y),
+  UNIQUE(world_state_id, x, y),
   CHECK (type IN ('factory', 'empty', 'village', 'field', 'water', 'forest')),
   CHECK (state IN ('polluted', 'repaired', 'embellished', 'watered', 'planted', 'normal')),
   CHECK (block_type IS NULL OR block_type IN ('factory', 'debris', 'wall', 'decor')),

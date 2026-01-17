@@ -27,15 +27,20 @@ const db = new sqlite3.Database(dbPath, (err) => {
 
 // Initialize database schema
 function initializeDatabase() {
-  const schemaPath = path.join(__dirname, 'db', 'create_tables.sql')
-  const schema = fs.readFileSync(schemaPath, 'utf8')
-  
-  db.exec(schema, (err) => {
-    if (err) {
-      console.error('❌ Failed to initialize database schema:', err.message)
-    } else {
-      console.log('✅ Database schema initialized')
-    }
+  // Drop old tables if they exist with wrong schema
+  db.run('DROP TABLE IF EXISTS world_tiles', (err) => {
+    if (err) console.error('Error dropping old world_tiles:', err.message)
+    
+    const schemaPath = path.join(__dirname, 'db', 'create_tables.sql')
+    const schema = fs.readFileSync(schemaPath, 'utf8')
+    
+    db.exec(schema, (err) => {
+      if (err) {
+        console.error('❌ Failed to initialize database schema:', err.message)
+      } else {
+        console.log('✅ Database schema initialized')
+      }
+    })
   })
 }
 
