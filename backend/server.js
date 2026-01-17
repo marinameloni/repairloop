@@ -12,7 +12,12 @@ require('dotenv').config()
 const app = express()
 const server = http.createServer(app)
 const io = socketIo(server, {
-  cors: { origin: process.env.CORS_ORIGIN || 'http://localhost:3000' }
+  cors: {
+    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    credentials: true,
+    methods: ['GET', 'POST']
+  },
+  transports: ['websocket', 'polling']
 })
 
 const dbPath = process.env.DB_PATH || path.join(__dirname, 'game.db')
