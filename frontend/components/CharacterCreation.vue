@@ -4,10 +4,15 @@
       <div class="auth-header">
         <h1>Repair Loop</h1>
         <p class="subtitle">Répare le monde et réenchante le :)</p>
-        <div class="mode-toggle">
-          <button :class="{ active: isLoginMode }" @click="isLoginMode = true">Login</button>
-          <button :class="{ active: !isLoginMode }" @click="isLoginMode = false">Sign Up</button>
-        </div>
+      </div>
+
+      <div class="mode-toggle">
+        <button :class="{ active: isLoginMode }" @click="isLoginMode = true" class="toggle-btn">
+          🎮 LOGIN
+        </button>
+        <button :class="{ active: !isLoginMode }" @click="isLoginMode = false" class="toggle-btn">
+          🚀 SIGN UP
+        </button>
       </div>
 
       <div class="auth-content">
@@ -160,6 +165,7 @@ const login = async () => {
     sessionStorage.setItem('playerName', player.player.username)
     sessionStorage.setItem('avatarType', player.player.avatar_type)
     sessionStorage.setItem('token', player.token)
+    localStorage.setItem('playerUsername', player.player.username)
 
     router.push('/game')
   } catch (err) {
@@ -231,6 +237,7 @@ const createAccount = async () => {
     sessionStorage.setItem('playerName', player.player.username)
     sessionStorage.setItem('avatarType', player.player.avatar_type)
     sessionStorage.setItem('token', player.token)
+    localStorage.setItem('playerUsername', player.player.username)
 
     router.push('/game')
   } catch (err) {

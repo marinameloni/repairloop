@@ -11,6 +11,20 @@ router.get('/', (req, res) => {
   })
 })
 
+// GET blocked tiles for a map
+router.get('/map/:mapId', (req, res) => {
+  const { mapId } = req.params
+  const { db } = require('../server')
+  db.all(
+    'SELECT x, y, is_blocked, block_type FROM world_tiles WHERE world_state_id = ? AND is_blocked = 1',
+    [mapId],
+    (err, rows) => {
+      if (err) return res.status(500).json({ error: err.message })
+      res.json(rows || [])
+    }
+  )
+})
+
 // GET tile by id
 router.get('/:id', (req, res) => {
   WorldTile.getById(req.params.id, (err, row) => {
