@@ -49,6 +49,28 @@ router.post('/', validatePlayerCreation, handleValidationErrors, (req, res) => {
 })
 
 // POST login
+router.post('/login', validateLogin, handleValidationErrors, (req, res) => {
+  const { username, password } = req.body
+  
+  Player.authenticate(username, password, (err, player) => {
+    if (err) return res.status(500).json({ error: 'Authentication failed' })
+    if (!player) return res.status(401).json({ error: 'Invalid username or password' })
+    
+    // Generate token
+    const token = generateToken(player.id, player.username)
+    
+    res.json({
+      player: {
+        id: player.id,
+        username: player.username,
+        avatar_type: player.avatar_type
+      },
+      token
+    })
+  })
+})
+
+// POST login (auth/login - legacy)
 router.post('/auth/login', validateLogin, handleValidationErrors, (req, res) => {
   const { username, password } = req.body
   

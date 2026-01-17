@@ -4,31 +4,38 @@
       <div class="auth-header">
         <h1>Repair Loop</h1>
         <p class="subtitle">Répare le monde et réenchante le :)</p>
+        <div class="mode-toggle">
+          <button :class="{ active: isLoginMode }" @click="isLoginMode = true">Login</button>
+          <button :class="{ active: !isLoginMode }" @click="isLoginMode = false">Sign Up</button>
+        </div>
       </div>
 
       <div class="auth-content">
-        <!-- Avatar Selection -->
-        <div class="form-group">
-          <label>Choose Your Avatar</label>
-          <div class="avatar-selector">
-            <div
-              class="avatar-option"
-              :class="{ selected: form.avatarType === 'girl' }"
-              @click="form.avatarType = 'girl'"
-            >
-              <span class="avatar-icon">👧</span>
-              <span class="avatar-label">Girl</span>
-            </div>
-            <div
-              class="avatar-option"
-              :class="{ selected: form.avatarType === 'boy' }"
-              @click="form.avatarType = 'boy'"
-            >
-              <span class="avatar-icon">👦</span>
-              <span class="avatar-label">Boy</span>
+        <!-- SIGN UP MODE -->
+        <template v-if="!isLoginMode">
+          <!-- Avatar Selection -->
+          <div class="form-group">
+            <label>Choose Your Avatar</label>
+            <div class="avatar-selector">
+              <div
+                class="avatar-option"
+                :class="{ selected: form.avatarType === 'girl' }"
+                @click="form.avatarType = 'girl'"
+              >
+                <span class="avatar-icon">👧</span>
+                <span class="avatar-label">Girl</span>
+              </div>
+              <div
+                class="avatar-option"
+                :class="{ selected: form.avatarType === 'boy' }"
+                @click="form.avatarType = 'boy'"
+              >
+                <span class="avatar-icon">👦</span>
+                <span class="avatar-label">Boy</span>
+              </div>
             </div>
           </div>
-        </div>
+        </template>
 
         <!-- Username Input -->
         <div class="form-group">
@@ -55,8 +62,8 @@
           />
         </div>
 
-        <!-- Password Confirm Input -->
-        <div class="form-group">
+        <!-- Password Confirm Input (Sign Up Only) -->
+        <div v-if="!isLoginMode" class="form-group">
           <label for="password-confirm">Confirm Password</label>
           <input
             id="password-confirm"
@@ -64,7 +71,7 @@
             type="password"
             placeholder="Confirm your password"
             minlength="6"
-            @keyup.enter="createAccount"
+            @keyup.enter="isLoginMode ? login() : createAccount()"
           />
         </div>
 
@@ -73,18 +80,18 @@
           {{ error }}
         </div>
 
-        <!-- Create Account Button -->
+        <!-- Buttons -->
         <button
-          @click="createAccount"
+          @click="isLoginMode ? login() : createAccount()"
           :disabled="!form.username || loading"
           class="btn-create"
         >
-          <span v-if="!loading">🚀 Start Playing</span>
+          <span v-if="!loading">{{ isLoginMode ? '🎮 Login' : '🚀 Start Playing' }}</span>
           <span v-else>Loading...</span>
         </button>
 
-        <!-- Info Section -->
-        <div class="info-section">
+        <!-- Info Section (Sign Up Only) -->
+        <div v-if="!isLoginMode" class="info-section">
           <h3>What awaits you?</h3>
           <ul>
             <li>🌍 Explore a massive polluted world</li>
@@ -104,6 +111,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
+const isLoginMode = ref(false)
 const form = ref({
   username: '',
   password: '',
@@ -113,6 +121,54 @@ const form = ref({
 
 const error = ref('')
 const loading = ref(false)
+
+const login = async () => {
+  if (!form.value.username.trim()) {
+    error.value = 'Please enter a username'
+    return
+  }
+
+  if (!form.value.password) {
+    error.value = 'Please enter a password'
+    return
+  }
+
+  loading.value = true
+  error.value = ''
+
+  try {
+    const apiBase = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3001'
+    const response = await fetch(`${apiBase}/api/players/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        username: form.value.username,
+        password: form.value.password
+      })
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(errorData.error || 'Invalid username or password')
+    }
+
+    const player = await response.json()
+
+    sessionStorage.setItem('playerId', player.player.id)
+    sessionStorage.setItem('playerName', player.player.username)
+    sessionStorage.setItem('avatarType', player.player.avatar_type)
+    sessionStorage.setItem('token', player.token)
+
+    router.push('/game')
+  } catch (err) {
+    console.error('Login error:', err)
+    error.value = err.message || 'Failed to login. Please try again.'
+  } finally {
+    loading.value = false
+  }
+}
 
 const createAccount = async () => {
   if (!form.value.username.trim()) {
@@ -144,7 +200,6 @@ const createAccount = async () => {
   error.value = ''
 
   try {
-    // Create player
     const apiBase = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3001'
     const response = await fetch(`${apiBase}/api/players`, {
       method: 'POST',
@@ -172,13 +227,11 @@ const createAccount = async () => {
 
     const player = await response.json()
 
-    // Store player in sessionStorage or state management
     sessionStorage.setItem('playerId', player.player.id)
     sessionStorage.setItem('playerName', player.player.username)
     sessionStorage.setItem('avatarType', player.player.avatar_type)
     sessionStorage.setItem('token', player.token)
 
-    // Navigate to game
     router.push('/game')
   } catch (err) {
     console.error('Account creation error:', err)
@@ -190,4 +243,34 @@ const createAccount = async () => {
 </script>
 
 <style scoped>
+.mode-toggle {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+  justify-content: center;
+}
+
+.mode-toggle button {
+  padding: 8px 20px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+.mode-toggle button.active {
+  background: #4CAF50;
+  border-color: #45a049;
+}
+
+.mode-toggle button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.mode-toggle button.active:hover {
+  background: #45a049;
+}
 </style>

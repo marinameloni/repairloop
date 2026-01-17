@@ -17,7 +17,7 @@
     </div>
 
     <div class="map-container">
-      <div class="map-background" :style="{ backgroundImage: `url(/maps/${mapAsset})` }">
+      <div class="map-background" :style="{ backgroundImage: `url(${mapAsset})` }">
         <div class="grid">
           <div
             v-for="(row, y) in tiles"
@@ -54,6 +54,10 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import mapLevel1 from '~/assets/maps/maplevel1.png'
+import mapLevel2 from '~/assets/maps/maplevel2.png'
+import mapLevel3 from '~/assets/maps/maplevel3.png'
+import mapLevel4 from '~/assets/maps/maplevel4.png'
 
 const currentMapId = ref(1)
 const gridWidth = ref(20)
@@ -61,10 +65,10 @@ const gridHeight = ref(15)
 const tiles = ref([])
 
 const mapAssets = {
-  1: 'maplevel1.png',
-  2: 'maplevel2.png',
-  3: 'maplevel3.png',
-  4: 'maplevel4.png'
+  1: mapLevel1,
+  2: mapLevel2,
+  3: mapLevel3,
+  4: mapLevel4
 }
 
 const mapAsset = computed(() => mapAssets[currentMapId.value])
@@ -107,7 +111,8 @@ const toggleBlock = (x, y) => {
 
 const saveTiles = async () => {
   try {
-    const response = await fetch('/api/tiles/save', {
+    const apiBase = 'http://localhost:3001'
+    const response = await fetch(`${apiBase}/api/tiles/save`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -117,9 +122,13 @@ const saveTiles = async () => {
     })
     if (response.ok) {
       alert('Tiles saved!')
+    } else {
+      const error = await response.json()
+      alert('Error: ' + (error.error || 'Failed to save'))
     }
   } catch (error) {
     console.error('Error saving tiles:', error)
+    alert('Error: ' + error.message)
   }
 }
 </script>
