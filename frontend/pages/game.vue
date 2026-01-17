@@ -215,7 +215,8 @@ const initializeTiles = () => {
 
 const loadBlockedTiles = async () => {
   try {
-    const response = await fetch(`/api/tiles/map/${currentMapId.value}`)
+    const backendUrl = `${window.location.protocol}//${window.location.hostname}:3001/api/tiles/map/${currentMapId.value}`
+    const response = await fetch(backendUrl)
     if (response.ok) {
       const blockedTiles = await response.json()
       console.log(`Loaded ${blockedTiles.length} blocked tiles for map ${currentMapId.value}`)

@@ -142,10 +142,10 @@ const login = async () => {
   error.value = ''
 
   try {
-    // Always use relative path in production, absolute in development
-    const apiPath = '/api/players/login'
-    console.log('🔐 Logging in to:', apiPath)
-    const response = await fetch(apiPath, {
+    // Direct backend URL
+    const backendUrl = `${window.location.protocol}//${window.location.hostname}:3001/api/players/login`
+    console.log('🔐 Logging in to:', backendUrl)
+    const response = await fetch(backendUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -157,7 +157,6 @@ const login = async () => {
     })
 
     console.log('📡 Response status:', response.status)
-    console.log('📡 Response headers:', response.headers)
     
     const responseText = await response.text()
     console.log('📡 Response body (raw):', responseText)
@@ -219,9 +218,10 @@ const createAccount = async () => {
   error.value = ''
 
   try {
-    // Always use relative path in production, absolute in development
-    const apiPath = '/api/players'
-    const response = await fetch(apiPath, {
+    // Direct backend URL
+    const backendUrl = `${window.location.protocol}//${window.location.hostname}:3001/api/players`
+    console.log('🚀 Creating account on:', backendUrl)
+    const response = await fetch(backendUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -240,12 +240,20 @@ const createAccount = async () => {
       })
     })
 
+    const responseText = await response.text()
+    console.log('📡 Response:', responseText)
+
     if (!response.ok) {
-      const errorData = await response.json()
-      throw new Error(errorData.error || 'Failed to create account')
+      try {
+        const errorData = JSON.parse(responseText)
+        throw new Error(errorData.error || 'Failed to create account')
+      } catch (e) {
+        throw new Error('Failed to create account')
+      }
     }
 
-    const player = await response.json()
+    const player = JSON.parse(responseText)
+    console.log('✅ Account created:', player)
 
     sessionStorage.setItem('playerId', player.player.id)
     sessionStorage.setItem('playerName', player.player.username)
@@ -255,7 +263,7 @@ const createAccount = async () => {
 
     router.push('/game')
   } catch (err) {
-    console.error('Account creation error:', err)
+    console.error('❌ Account creation error:', err)
     error.value = err.message || 'Failed to create account. Please try again.'
   } finally {
     loading.value = false
